@@ -4,24 +4,30 @@ import _ from "lodash";
 export function createCommentsCollection(data) {
   const newObj = _.cloneDeep(data);
   const { comments } = newObj;
-  return Object.keys(comments).map(comment => {
+  return Object.keys(comments).reduce((acc, comment) => {
     const oldComment = comments[comment];
-    const newComment = {
-      answerId: (oldComment.answerAuthor && oldComment.answerAuthor.id) || null,
-      authorId: (oldComment.author && oldComment.author.id) || null,
-      chapterId: oldComment.chapterId || null,
-      commentId: oldComment.commentId || null,
-      createdAt:
-        (oldComment.date && new Date(oldComment.date)) ||
-        firestore.FieldValue.serverTimestamp(),
-      exerciseId: oldComment.exerciseId || null,
-      id: oldComment.id,
-      solutionManualId: oldComment.solutionManualId || null,
-      subchapterId: oldComment.subchapterId || null,
-      text: oldComment.text || null
-    };
-    return newComment;
-  });
+    if (oldComment.author && oldComment.author.id) {
+      const commentId = oldComment.commentId || null;
+      const answerId =
+        (oldComment.answerAuthor && oldComment.answerAuthor.id) || null;
+      const newComment = {
+        answerId: commentId ? null : answerId,
+        authorId: (oldComment.author && oldComment.author.id) || null,
+        // chapterId: oldComment.chapterId || null,
+        commentId: commentId,
+        createdAt:
+          (oldComment.date && new Date(oldComment.date)) ||
+          firestore.FieldValue.serverTimestamp(),
+        // exerciseId: oldComment.exerciseId || null,
+        id: oldComment.id,
+        // solutionManualId: oldComment.solutionManualId || null,
+        // subchapterId: oldComment.subchapterId || null,
+        text: oldComment.text || null
+      };
+      acc.push(newComment);
+    }
+    return acc;
+  }, []);
 }
 
 export function createUsersCollection(data) {
