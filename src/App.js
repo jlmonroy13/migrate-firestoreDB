@@ -1,6 +1,6 @@
-import React, { Component } from "react";
-import "./App.css";
-import { fetchDataBase } from "./api";
+import React, { Component } from 'react';
+import './App.css';
+import { fetchDataBase } from './api';
 import {
   createCommentsCollection,
   createUsersCollection,
@@ -11,17 +11,18 @@ import {
   createVotesCollection,
   createAnswersCollection,
   createSuggestedBooksCollection,
-  createServiceRequestsCollection
-} from "./utils/firestore";
-import db from "./constants/ref";
-import { divideArrIntoArrays } from "./utils/array";
+  createServiceRequestsCollection,
+  createSearchesCollection
+} from './utils/firestore';
+import db from './constants/ref';
+import { divideArrIntoArrays } from './utils/array';
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
       uploadingBatch: false,
-      oldData: "",
+      oldData: '',
       comments: [],
       batchsComments: 1,
       users: [],
@@ -52,6 +53,7 @@ class App extends Component {
     this.uploadSolutionManuals = this.uploadSolutionManuals.bind(this);
     this.uploadServiceRequests = this.uploadServiceRequests.bind(this);
     this.uploadSuggestedBooks = this.uploadSuggestedBooks.bind(this);
+    this.uploadSearches = this.uploadSearches.bind(this);
     this.uploadBatchs = this.uploadBatchs.bind(this);
     this.fetchOldData = this.fetchOldData.bind(this);
   }
@@ -96,12 +98,17 @@ class App extends Component {
       const batchsServiceRequests = Math.ceil(
         serviceRequests.length / maxElementInBatch
       );
+      const searches = createSearchesCollection(data);
+      console.warn(searches, 'BUSQUEDAS!');
+      const batchsSearches = Math.ceil(searches.length / maxElementInBatch);
       this.setState({
         oldData: data,
         comments: divideArrIntoArrays(comments, batchsComments, true),
         batchsComments,
         users: divideArrIntoArrays(users, batchsUsers, true),
         batchsUsers,
+        searches: divideArrIntoArrays(searches, batchsSearches, true),
+        batchsSearches,
         chapters: divideArrIntoArrays(chapters, batchsChapters, true),
         batchsChapters,
         subchapters: divideArrIntoArrays(subchapters, batchsSubchapters, true),
@@ -162,7 +169,7 @@ class App extends Component {
       this.uploadBatchs(
         comments,
         batchsComments,
-        "comments",
+        'comments',
         this.uploadComments
       );
     }
@@ -170,7 +177,18 @@ class App extends Component {
   uploadUsers() {
     const { users, batchsUsers } = this.state;
     if (batchsUsers) {
-      this.uploadBatchs(users, batchsUsers, "users", this.uploadUsers);
+      this.uploadBatchs(users, batchsUsers, 'users', this.uploadUsers);
+    }
+  }
+  uploadSearches() {
+    const { searches, batchsSearches } = this.state;
+    if (batchsSearches) {
+      this.uploadBatchs(
+        searches,
+        batchsSearches,
+        'searches',
+        this.uploadSearches
+      );
     }
   }
   uploadChapters() {
@@ -179,7 +197,7 @@ class App extends Component {
       this.uploadBatchs(
         chapters,
         batchsChapters,
-        "chapters",
+        'chapters',
         this.uploadChapters
       );
     }
@@ -190,7 +208,7 @@ class App extends Component {
       this.uploadBatchs(
         subchapters,
         batchsSubchapters,
-        "subchapters",
+        'subchapters',
         this.uploadSubchapters
       );
     }
@@ -201,7 +219,7 @@ class App extends Component {
       this.uploadBatchs(
         exercises,
         batchsExercises,
-        "exercises",
+        'exercises',
         this.uploadExercises
       );
     }
@@ -209,13 +227,13 @@ class App extends Component {
   uploadVotes() {
     const { votes, batchsVotes } = this.state;
     if (batchsVotes) {
-      this.uploadBatchs(votes, batchsVotes, "votes", this.uploadVotes);
+      this.uploadBatchs(votes, batchsVotes, 'votes', this.uploadVotes);
     }
   }
   uploadAnswers() {
     const { answers, batchsAnswers } = this.state;
     if (batchsAnswers) {
-      this.uploadBatchs(answers, batchsAnswers, "answers", this.uploadAnswers);
+      this.uploadBatchs(answers, batchsAnswers, 'answers', this.uploadAnswers);
     }
   }
   uploadServiceRequests() {
@@ -224,7 +242,7 @@ class App extends Component {
       this.uploadBatchs(
         serviceRequests,
         batchsServiceRequests,
-        "serviceRequests",
+        'serviceRequests',
         this.uploadServiceRequests
       );
     }
@@ -235,7 +253,7 @@ class App extends Component {
       this.uploadBatchs(
         suggestedBooks,
         batchsSuggestedBooks,
-        "suggestedBooks",
+        'suggestedBooks',
         this.uploadSuggestedBooks
       );
     }
@@ -246,7 +264,7 @@ class App extends Component {
       this.uploadBatchs(
         solutionManuals,
         batchsSolutionManuals,
-        "solutionManuals",
+        'solutionManuals',
         this.uploadSolutionManuals
       );
     }
@@ -264,7 +282,8 @@ class App extends Component {
       batchsAnswers,
       batchsServiceRequests,
       batchsSuggestedBooks,
-      batchsSolutionManuals
+      batchsSolutionManuals,
+      batchsSearches
     } = this.state;
     return (
       <div className="container">
@@ -283,7 +302,7 @@ class App extends Component {
             <div>
               <button
                 className={
-                  batchsComments === 0 ? "button button--succes" : "button"
+                  batchsComments === 0 ? 'button button--succes' : 'button'
                 }
                 disabled={uploadingBatch}
                 onClick={this.uploadComments}
@@ -292,7 +311,7 @@ class App extends Component {
               </button>
               <button
                 className={
-                  batchsUsers === 0 ? "button button--succes" : "button"
+                  batchsUsers === 0 ? 'button button--succes' : 'button'
                 }
                 disabled={uploadingBatch}
                 onClick={this.uploadUsers}
@@ -302,8 +321,8 @@ class App extends Component {
               <button
                 className={
                   batchsSolutionManuals === 0
-                    ? "button button--succes"
-                    : "button"
+                    ? 'button button--succes'
+                    : 'button'
                 }
                 disabled={uploadingBatch}
                 onClick={this.uploadSolutionManuals}
@@ -314,7 +333,7 @@ class App extends Component {
             <div>
               <button
                 className={
-                  batchsChapters === 0 ? "button button--succes" : "button"
+                  batchsChapters === 0 ? 'button button--succes' : 'button'
                 }
                 disabled={uploadingBatch}
                 onClick={this.uploadChapters}
@@ -323,7 +342,7 @@ class App extends Component {
               </button>
               <button
                 className={
-                  batchsSubchapters === 0 ? "button button--succes" : "button"
+                  batchsSubchapters === 0 ? 'button button--succes' : 'button'
                 }
                 disabled={uploadingBatch}
                 onClick={this.uploadSubchapters}
@@ -332,7 +351,7 @@ class App extends Component {
               </button>
               <button
                 className={
-                  batchsExercises === 0 ? "button button--succes" : "button"
+                  batchsExercises === 0 ? 'button button--succes' : 'button'
                 }
                 disabled={uploadingBatch}
                 onClick={this.uploadExercises}
@@ -343,7 +362,7 @@ class App extends Component {
             <div>
               <button
                 className={
-                  batchsVotes === 0 ? "button button--succes" : "button"
+                  batchsVotes === 0 ? 'button button--succes' : 'button'
                 }
                 disabled={uploadingBatch}
                 onClick={this.uploadVotes}
@@ -352,7 +371,7 @@ class App extends Component {
               </button>
               <button
                 className={
-                  batchsAnswers === 0 ? "button button--succes" : "button"
+                  batchsAnswers === 0 ? 'button button--succes' : 'button'
                 }
                 disabled={uploadingBatch}
                 onClick={this.uploadAnswers}
@@ -362,8 +381,8 @@ class App extends Component {
               <button
                 className={
                   batchsServiceRequests === 0
-                    ? "button button--succes"
-                    : "button"
+                    ? 'button button--succes'
+                    : 'button'
                 }
                 disabled={uploadingBatch}
                 onClick={this.uploadServiceRequests}
@@ -375,19 +394,28 @@ class App extends Component {
               <button
                 className={
                   batchsSuggestedBooks === 0
-                    ? "button button--succes"
-                    : "button"
+                    ? 'button button--succes'
+                    : 'button'
                 }
                 disabled={uploadingBatch}
                 onClick={this.uploadSuggestedBooks}
               >
                 Suggested Books ({batchsSuggestedBooks})
               </button>
+              <button
+                className={
+                  batchsSearches === 0 ? 'button button--succes' : 'button'
+                }
+                disabled={uploadingBatch}
+                onClick={this.uploadSearches}
+              >
+                Searches ({batchsSearches})
+              </button>
             </div>
           </div>
         )}
         {uploadingBatch && (
-          <p className="text">{oldData ? "Uploading" : "Loading"}...</p>
+          <p className="text">{oldData ? 'Uploading' : 'Loading'}...</p>
         )}
       </div>
     );

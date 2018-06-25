@@ -1,5 +1,5 @@
-import { firestore } from "firebase";
-import _ from "lodash";
+import { firestore } from 'firebase';
+import _ from 'lodash';
 
 export function createCommentsCollection(data) {
   const newObj = _.cloneDeep(data);
@@ -43,6 +43,32 @@ export function createUsersCollection(data) {
     };
     delete newUser.searches;
     if (newUser.id && newUser.displayName) acc.push(newUser);
+    return acc;
+  }, []);
+}
+
+export function createSearchesCollection(data) {
+  const newObj = _.cloneDeep(data);
+  const { users } = newObj;
+  return Object.keys(users).reduce((acc, user) => {
+    const searches = users[user].searches;
+    if (searches) {
+      Object.keys(searches).map(searchItem => {
+        const search = searches[searchItem];
+        const newSearch = {
+          id: search.id,
+          chapterId: search.chapter || null,
+          subchapterId: search.subchapter || null,
+          exerciseId: search.exercise || null,
+          solutionManualId: search.solutionManualId || null,
+          createdAt:
+            (search.date && new Date(search.date)) ||
+            firestore.FieldValue.serverTimestamp(),
+          userId: user
+        };
+        acc.push(newSearch);
+      });
+    }
     return acc;
   }, []);
 }
@@ -96,14 +122,14 @@ export function createSolutionManualsCollection(data) {
   return Object.keys(solutionManuals).map(solutionManual => {
     const oldSolMan = solutionManuals[solutionManual];
     const authors = oldSolMan.name
-      .substr(0, oldSolMan.name.indexOf("-"))
+      .substr(0, oldSolMan.name.indexOf('-'))
       .trim();
     const edition = oldSolMan.name
-      .split(" ")
+      .split(' ')
       .splice(-2)
-      .join(" ");
+      .join(' ');
     const name = oldSolMan.name
-      .match(new RegExp(authors + "(.*)" + edition))[1]
+      .match(new RegExp(authors + '(.*)' + edition))[1]
       .trim()
       .substr(2);
     const newSolutionManual = {
@@ -269,7 +295,7 @@ export function createAnswersCollection(data) {
                   answers[answKey].chapterId = item[key].id;
                   answers[answKey].subchapterId = subKey;
                   answers[answKey].exerciseId = exerKey;
-                  answers[answKey].authorId = "JEToAR1VQySEaj2sY80FdbeoHWI2";
+                  answers[answKey].authorId = 'JEToAR1VQySEaj2sY80FdbeoHWI2';
                   answers[answKey].createdAt = new Date(answers[answKey].date);
                   answers[answKey].isValidated = true;
                   delete answers[answKey].author;
@@ -292,7 +318,7 @@ export function createAnswersCollection(data) {
               answers[answKey].chapterId = item[key].id;
               answers[answKey].subchapterId = null;
               answers[answKey].exerciseId = exerKey;
-              answers[answKey].authorId = "JEToAR1VQySEaj2sY80FdbeoHWI2";
+              answers[answKey].authorId = 'JEToAR1VQySEaj2sY80FdbeoHWI2';
               answers[answKey].createdAt = new Date(answers[answKey].date);
               answers[answKey].isValidated = true;
               delete answers[answKey].author;
