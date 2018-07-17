@@ -42,6 +42,9 @@ export function createUsersCollection(data) {
         firestore.FieldValue.serverTimestamp()
     };
     delete newUser.searches;
+    delete newUser.answers;
+    delete newUser.votes;
+    delete newUser.comments;
     if (newUser.id && newUser.displayName) acc.push(newUser);
     return acc;
   }, []);
@@ -301,6 +304,7 @@ export function createAnswersCollection(data) {
                   delete answers[answKey].author;
                   delete answers[answKey].date;
                   delete answers[answKey].votes;
+                  delete answers[answKey].comments;
                   acc.push({
                     ...answers[answKey]
                   });
