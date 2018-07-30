@@ -328,6 +328,7 @@ export function createAnswersCollection(data) {
               delete answers[answKey].author;
               delete answers[answKey].date;
               delete answers[answKey].votes;
+              delete answers[answKey].comments;
               acc.push({
                 ...answers[answKey]
               });
